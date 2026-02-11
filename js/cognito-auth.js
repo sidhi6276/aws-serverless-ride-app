@@ -3,6 +3,7 @@
 var WildRydes = window.WildRydes || {};
 
 (function scopeWrapper($) {
+
     var signinUrl = '/signin.html';
 
     var poolData = {
@@ -25,10 +26,15 @@ var WildRydes = window.WildRydes || {};
         AWSCognito.config.region = _config.cognito.region;
     }
 
+    // ✅ Logout
     WildRydes.signOut = function signOut() {
-        userPool.getCurrentUser().signOut();
+        var currentUser = userPool.getCurrentUser();
+        if (currentUser) {
+            currentUser.signOut();
+        }
     };
 
+    // ✅ Get auth token
     WildRydes.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject) {
         var cognitoUser = userPool.getCurrentUser();
 
@@ -47,31 +53,39 @@ var WildRydes = window.WildRydes || {};
         }
     });
 
+    /*
+     * Username converter (important for Cognito)
+     */
+    function toUsername(email) {
+        return email.replace('@', '-at-');
+    }
+
+    /*
+     * Cognito functions
+     */
+
     function register(email, password, onSuccess, onFailure) {
-        var dataEmail = {
+        var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute({
             Name: 'email',
             Value: email
-        };
-        var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+        });
 
-        userPool.signUp(email, password, [attributeEmail], null,
+        userPool.signUp(toUsername(email), password, [attributeEmail], null,
             function signUpCallback(err, result) {
-                if (!err) {
-                    onSuccess(result);
-                } else {
-                    onFailure(err);
-                }
+                if (!err) onSuccess(result);
+                else onFailure(err);
             }
         );
     }
 
     function signin(email, password, onSuccess, onFailure) {
         var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
-            Username: email,
+            Username: toUsername(email),
             Password: password
         });
 
         var cognitoUser = createCognitoUser(email);
+
         cognitoUser.authenticateUser(authenticationDetails, {
             onSuccess: onSuccess,
             onFailure: onFailure
@@ -79,21 +93,24 @@ var WildRydes = window.WildRydes || {};
     }
 
     function verify(email, code, onSuccess, onFailure) {
-        createCognitoUser(email).confirmRegistration(code, true, function confirmCallback(err, result) {
-            if (!err) {
-                onSuccess(result);
-            } else {
-                onFailure(err);
+        createCognitoUser(email).confirmRegistration(code, true,
+            function confirmCallback(err, result) {
+                if (!err) onSuccess(result);
+                else onFailure(err);
             }
-        });
+        );
     }
 
     function createCognitoUser(email) {
         return new AmazonCognitoIdentity.CognitoUser({
-            Username: email,
+            Username: toUsername(email),
             Pool: userPool
         });
     }
+
+    /*
+     * Event handlers
+     */
 
     $(function onDocReady() {
         $('#signinForm').submit(handleSignin);
@@ -102,59 +119,61 @@ var WildRydes = window.WildRydes || {};
     });
 
     function handleSignin(event) {
+        event.preventDefault();
+
         var email = $('#emailInputSignin').val();
         var password = $('#passwordInputSignin').val();
-        event.preventDefault();
+
         signin(email, password,
             function signinSuccess() {
-                console.log('Successfully Logged In');
+                console.log('Login success');
                 window.location.href = 'ride.html';
             },
             function signinError(err) {
-                alert(err);
+                alert(err.message || err);
             }
         );
     }
 
     function handleRegister(event) {
+        event.preventDefault();
+
         var email = $('#emailInputRegister').val();
         var password = $('#passwordInputRegister').val();
         var password2 = $('#password2InputRegister').val();
 
-        var onSuccess = function registerSuccess(result) {
-            var cognitoUser = result.user;
-            console.log('user name is ' + cognitoUser.getUsername());
-            var confirmation = ('Registration successful. Please check your email inbox or spam folder for your verification code.');
-            if (confirmation) {
-                window.location.href = 'verify.html';
-            }
-        };
-        var onFailure = function registerFailure(err) {
-            alert(err);
-        };
-        event.preventDefault();
-
-        if (password === password2) {
-            register(email, password, onSuccess, onFailure);
-        } else {
+        if (password !== password2) {
             alert('Passwords do not match');
+            return;
         }
-    }
 
-    function handleVerify(event) {
-        var email = $('#emailInputVerify').val();
-        var code = $('#codeInputVerify').val();
-        event.preventDefault();
-        verify(email, code,
-            function verifySuccess(result) {
-                console.log('call result: ' + result);
-                console.log('Successfully verified');
-                alert('Verification successful. You will now be redirected to the login page.');
-                window.location.href = signinUrl;
+        register(email, password,
+            function registerSuccess(result) {
+                console.log('Registered:', result.user.getUsername());
+                window.location.href = 'verify.html';
             },
-            function verifyError(err) {
-                alert(err);
+            function registerFailure(err) {
+                alert(err.message || err);
             }
         );
     }
+
+    function handleVerify(event) {
+        event.preventDefault();
+
+        var email = $('#emailInputVerify').val();
+        var code = $('#codeInputVerify').val();
+
+        verify(email, code,
+            function verifySuccess(result) {
+                console.log('Verified:', result);
+                alert('Verification successful!');
+                window.location.href = signinUrl;
+            },
+            function verifyError(err) {
+                alert(err.message || err);
+            }
+        );
+    }
+
 }(jQuery));
