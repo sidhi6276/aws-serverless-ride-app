@@ -10,11 +10,10 @@
 <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
 <script src="https://js.arcgis.com/4.25/"></script>
 
-<!-- Styles -->
-<link rel="stylesheet" href="css/main.css">
-
-<!-- JS -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- App JS -->
 <script src="js/config.js"></script>
 <script src="js/cognito-auth.js"></script>
 <script src="js/ride.js"></script>
@@ -28,7 +27,7 @@ body {
 }
 
 .sidebar {
-    width: 300px;
+    width: 320px;
     height: 100vh;
     background: #140b2b;
     padding: 20px;
@@ -38,9 +37,13 @@ body {
     top: 0;
 }
 
+.sidebar h2 {
+    margin-top: 0;
+}
+
 #map {
     position: absolute;
-    left: 300px;
+    left: 320px;
     right: 0;
     top: 0;
     bottom: 0;
@@ -66,22 +69,29 @@ ul {
     padding-left: 20px;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="sidebar">
-    <h2>🦄 Request Ride</h2>
-    <p>Click map to choose pickup location</p>
 
-    <button id="request" disabled>Select Pickup Location</button>
+    <h2>🦄 Request Ride</h2>
+    <p>Click on the map to choose pickup location</p>
+
+    <button id="request" disabled>
+        Select Pickup Location
+    </button>
 
     <h3>Live Updates</h3>
-    <ul id="updates">
+    <ul id="updatesList">
         <li>Waiting for location...</li>
     </ul>
 
-    <button id="signOut">Sign Out</button>
+    <button id="signOut">
+        Sign Out
+    </button>
+
 </div>
 
 <div id="map"></div>
