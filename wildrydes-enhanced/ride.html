@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Request Your Magical Ride">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wild Rydes - Request a Magical Ride 🦄</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.3/esri/css/main.css">
+    <link rel="stylesheet" href="css/font.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/ride.css">
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.6/dist/amazon-cognito-identity.min.js"></script>
+    <script src="https://js.arcgis.com/4.3/"></script>
+    <script src="js/config.js"></script>
+    <script src="js/cognito-auth.js"></script>
+    <script src="js/esri-map.js"></script>
+    <script src="js/ride.js"></script>
+</head>
+
+<body class="page-ride" data-theme="mythical">
+
+    <!-- Magical Background Effects -->
+    <div class="aurora-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-glass">
+        <div class="nav-container">
+            <a href="index.html" class="logo-mythical">
+                <span class="logo-icon">🦄</span>
+                <span class="logo-text">
+                    <span class="logo-wild">Wild</span>
+                    <span class="logo-rydes">Rydes</span>
+                </span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-text="Home">Home</a>
+                <a href="unicorns.html" class="nav-link" data-text="Fleet">Fleet</a>
+                <a href="faq.html" class="nav-link" data-text="FAQ">FAQ</a>
+                <a id="signOut" class="btn-magic" style="cursor: pointer;">
+                    <span>Sign Out</span>
+                    <div class="magic-glow"></div>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Configuration Messages -->
+    <div id="noApiMessage" class="config-overlay" style="display: none;">
+        <div class="config-backdrop"></div>
+        <div class="config-panel">
+            <div class="config-header">
+                <div class="success-icon">✅</div>
+                <h2>Successfully Authenticated!</h2>
+            </div>
+            <div class="config-body">
+                <p>Great news! You're logged in, but the ride request feature isn't fully configured yet.</p>
+                <div class="info-box">
+                    <strong>What's missing?</strong>
+                    <p>The API Gateway invoke URL hasn't been set in <code>js/config.js</code>.</p>
+                    <p class="hint">You'll configure this in Module 3 of the AWS setup guide.</p>
+                </div>
+                <p>In the meantime, here's your authentication token for testing:</p>
+                <textarea class="auth-token" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="noCognitoMessage" class="config-overlay" style="display: none;">
+        <div class="config-backdrop"></div>
+        <div class="config-panel">
+            <div class="config-header warning">
+                <div class="warning-icon">⚠️</div>
+                <h2>Configuration Required</h2>
+            </div>
+            <div class="config-body">
+                <p>The Cognito User Pool hasn't been configured yet.</p>
+                <div class="info-box">
+                    <strong>Next Steps:</strong>
+                    <ol>
+                        <li>Create a Cognito User Pool in AWS Console</li>
+                        <li>Add the User Pool ID and Client ID to <code>js/config.js</code></li>
+                        <li>Refresh this page</li>
+                    </ol>
+                    <p class="hint">Check the DEPLOYMENT.md file for detailed instructions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Ride Interface -->
+    <div class="ride-interface">
+        <!-- Sidebar -->
+        <aside class="ride-sidebar">
+            <div class="sidebar-content">
+                <div class="ride-header">
+                    <h1 class="ride-title">
+                        <span class="magic-sparkle">✨</span>
+                        Request Your Ride
+                    </h1>
+                    <p class="ride-subtitle">Click on the map to set your pickup location</p>
+                </div>
+
+                <div class="instructions-card">
+                    <h3 class="instructions-title">How to Request</h3>
+                    <div class="instruction-steps">
+                        <div class="instruction">
+                            <div class="step-badge">1</div>
+                            <div class="step-content">
+                                <strong>Select Location</strong>
+                                <p>Click anywhere on the map</p>
+                            </div>
+                        </div>
+                        <div class="instruction">
+                            <div class="step-badge">2</div>
+                            <div class="step-content">
+                                <strong>Confirm Pickup</strong>
+                                <p>Verify your location</p>
+                            </div>
+                        </div>
+                        <div class="instruction">
+                            <div class="step-badge">3</div>
+                            <div class="step-content">
+                                <strong>Summon Unicorn</strong>
+                                <p>Click the request button</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="request" class="btn-request-ride" disabled>
+                    <span class="btn-text">Select Pickup Location</span>
+                    <div class="btn-shimmer"></div>
+                </button>
+
+                <div class="ride-updates-card">
+                    <h3 class="updates-title">
+                        <span class="pulse-dot"></span>
+                        Live Updates
+                    </h3>
+                    <ul id="updatesList" class="updates-list">
+                        <li class="update-item initial">Waiting for location selection...</li>
+                    </ul>
+                </div>
+
+                <div class="tips-card">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-content">
+                        <strong>Pro Tip:</strong>
+                        <p>Unicorns arrive faster in open areas. Avoid dense forests and crowded streets!</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map" class="magical-map"></div>
+            <div class="map-overlay">
+                <div class="map-badge">
+                    <span class="badge-icon">📍</span>
+                    <span>Magical Map Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-compact">
+        <div class="footer-content">
+            <p>© 2015-2026 Wild Rydes, LLC • Magical Transportation</p>
+        </div>
+    </footer>
+
+    <style>
+        /* Additional Ride Page Specific Styles */
+        .ride-interface {
+            display: flex;
+            min-height: calc(100vh - 80px);
+            margin-top: 80px;
+        }
+
+        .ride-sidebar {
+            width: 420px;
+            background: rgba(15, 8, 32, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .sidebar-content {
+            padding: 2.5rem;
+        }
+
+        .ride-header {
+            margin-bottom: 2rem;
+        }
+
+        .ride-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .magic-sparkle {
+            animation: sparkle-rotate 3s linear infinite;
+        }
+
+        .ride-subtitle {
+            color: var(--light-300);
+            font-size: 1rem;
+        }
+
+        .instructions-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .instructions-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            color: var(--magic-purple);
+        }
+
+        .instruction-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .instruction {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient-magical);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .step-content p {
+            font-size: 0.875rem;
+            color: var(--light-300);
+        }
+
+        .btn-request-ride {
+            position: relative;
+            width: 100%;
+            padding: 1.25rem;
+            background: var(--gradient-magical);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .btn-request-ride:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-request-ride:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-shimmer {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            to { left: 100%; }
+        }
+
+        .ride-updates-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .updates-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--magic-emerald);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .updates-list {
+            list-style: none;
+        }
+
+        .update-item {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--magic-purple);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            animation: slide-in 0.3s ease;
+        }
+
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .update-item.initial {
+            color: var(--light-300);
+        }
+
+        .tips-card {
+            display: flex;
+            gap: 1rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .tip-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .tip-content strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--magic-gold);
+        }
+
+        .tip-content p {
+            font-size: 0.875rem;
+            color: var(--light-300);
+            line-height: 1.6;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .magical-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+
+        .map-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(15, 8, 32, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-icon {
+            font-size: 1.125rem;
+        }
+
+        /* Configuration Overlays */
+        .config-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .config-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+        }
+
+        .config-panel {
+            position: relative;
+            max-width: 600px;
+            width: 100%;
+            background: rgba(15, 8, 32, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .config-header {
+            padding: 2rem;
+            background: var(--gradient-magical);
+            text-align: center;
+        }
+
+        .config-header.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+        }
+
+        .success-icon, .warning-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .config-header h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .config-body {
+            padding: 2rem;
+        }
+
+        .config-body p {
+            margin-bottom: 1rem;
+            color: var(--light-300);
+            line-height: 1.8;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--magic-purple);
+            font-size: 1.125rem;
+        }
+
+        .info-box ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .info-box li {
+            margin-bottom: 0.5rem;
+            color: var(--light-200);
+        }
+
+        .info-box code {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: var(--magic-purple);
+        }
+
+        .hint {
+            font-size: 0.875rem;
+            color: var(--magic-cyan);
+            font-style: italic;
+        }
+
+        .auth-token {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--light-200);
+            font-family: monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        .footer-compact {
+            background: rgba(15, 8, 32, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .footer-compact p {
+            color: var(--light-300);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .ride-interface {
+                flex-direction: column;
+            }
+
+            .ride-sidebar {
+                width: 100%;
+                max-height: 50vh;
+            }
+
+            .map-container {
+                min-height: 50vh;
+            }
+        }
+    </style>
+
+</body>
+</html>

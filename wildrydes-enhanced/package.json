@@ -1,0 +1,50 @@
+{
+  "name": "wildrydes-site",
+  "version": "2.0.0",
+  "description": "A serverless web application for requesting unicorn rides, built with AWS services",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "python3 -m http.server 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-USERNAME/wildrydes-site.git"
+  },
+  "keywords": [
+    "aws",
+    "serverless",
+    "lambda",
+    "cognito",
+    "amplify",
+    "dynamodb",
+    "api-gateway",
+    "tutorial",
+    "web-app"
+  ],
+  "author": "Wild Rydes Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "cdnDependencies": {
+    "jquery": "3.1.0",
+    "bootstrap": "3.3.7",
+    "amazon-cognito-identity-js": "6.3.6",
+    "esri-loader": "4.3"
+  },
+  "awsServices": {
+    "hosting": "AWS Amplify",
+    "authentication": "Amazon Cognito",
+    "api": "Amazon API Gateway",
+    "compute": "AWS Lambda",
+    "database": "Amazon DynamoDB"
+  },
+  "features": [
+    "User registration and authentication",
+    "Interactive map for pickup location",
+    "Real-time ride requests",
+    "Serverless backend",
+    "Responsive design",
+    "Ride tracking"
+  ]
+}

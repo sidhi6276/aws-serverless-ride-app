@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Sign In to Wild Rydes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wild Rydes - Sign In 🦄</title>
+
+    <link rel="stylesheet" href="css/font.css">
+    <link rel="stylesheet" href="css/main.css">
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.6/dist/amazon-cognito-identity.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/cognito-auth.js"></script>
+</head>
+
+<body class="page-signin" data-theme="mythical">
+
+    <!-- Magical Background Effects -->
+    <div class="aurora-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-glass">
+        <div class="nav-container">
+            <a href="index.html" class="logo-mythical">
+                <span class="logo-icon">🦄</span>
+                <span class="logo-text">
+                    <span class="logo-wild">Wild</span>
+                    <span class="logo-rydes">Rydes</span>
+                </span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-text="Home">Home</a>
+                <a href="faq.html" class="nav-link" data-text="FAQ">FAQ</a>
+                <a href="register.html" class="nav-link" data-text="Register">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Form -->
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-icon">🔐</div>
+                    <h1 class="auth-title">Welcome Back</h1>
+                    <p class="auth-subtitle">Sign in to continue your magical journey</p>
+                </div>
+
+                <form id="signinForm" class="auth-form">
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="emailInputSignin" class="form-input" placeholder="your@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="passwordInputSignin" class="form-input" placeholder="Enter your password" pattern=".*" required>
+                    </div>
+
+                    <button type="submit" class="btn-auth">
+                        <span>Sign In</span>
+                        <div class="btn-shimmer"></div>
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="register.html" class="auth-link">Register</a></p>
+                </div>
+            </div>
+
+            <div class="auth-visual">
+                <div class="unicorn-float-large">🦄</div>
+                <div class="magic-text">
+                    <h2>Your Ride<br>Awaits</h2>
+                    <p>Over 1,000 magical unicorns ready to take you anywhere you want to go.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-compact">
+        <div class="footer-content">
+            <p>© 2015-2026 Wild Rydes, LLC • Magical Transportation</p>
+        </div>
+    </footer>
+
+</body>
+</html>
