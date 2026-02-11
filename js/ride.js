@@ -4,69 +4,99 @@ var WildRydes = window.WildRydes || {};
 WildRydes.map = WildRydes.map || {};
 
 (function rideScopeWrapper($) {
+
     var authToken;
-    WildRydes.authToken.then(function setAuthToken(token) {
+
+    WildRydes.authToken.then(function (token) {
         if (token) {
             authToken = token;
         } else {
             window.location.href = '/signin.html';
         }
-    }).catch(function handleTokenError(error) {
+    }).catch(function (error) {
         alert(error);
         window.location.href = '/signin.html';
     });
 
     function requestUnicorn(pickupLocation) {
+
         $.ajax({
             method: 'POST',
             url: _config.api.invokeUrl + '/ride',
-            headers: {
-                Authorization: authToken
-            },
+            headers: { Authorization: authToken },
+            contentType: 'application/json',
+
             data: JSON.stringify({
                 PickupLocation: {
                     Latitude: pickupLocation.latitude,
                     Longitude: pickupLocation.longitude
                 }
             }),
-            contentType: 'application/json',
+
             success: completeRequest,
-            error: function ajaxError(jqXHR, textStatus, errorThrown) {
-                console.error('Error requesting ride: ', textStatus, ', Details: ', errorThrown);
-                console.error('Response: ', jqXHR.responseText);
-                alert('An error occurred when requesting your unicorn:\n' + jqXHR.responseText);
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error('Ride error:', textStatus, errorThrown);
+                alert('Error requesting unicorn:\n' + jqXHR.responseText);
             }
         });
     }
 
     function completeRequest(result) {
-        var unicorn;
-        var pronoun;
-        console.log('Response received from API: ', result);
-        unicorn = result.Unicorn;
-        pronoun = unicorn.Gender === 'Male' ? 'his' : 'her';
-        displayUpdate(unicorn.Name + ', your ' + unicorn.Color + ' unicorn, is on ' + pronoun + ' way.');
+
+        console.log('API response:', result);
+
+        var unicorn = result.Unicorn;
+        var pronoun = unicorn.Gender === 'Male' ? 'his' : 'her';
+
+        displayUpdate(
+            unicorn.Name +
+            ', your ' +
+            unicorn.Color +
+            ' unicorn is on ' +
+            pronoun +
+            ' way.'
+        );
+
         if (WildRydes.map.unsetLocation) {
             WildRydes.map.unsetLocation();
         }
-        animateArrival(function animateCallback() {
+
+        animateArrival(function () {
+
             displayUpdate(unicorn.Name + ' has arrived. Giddy up!');
-            WildRydes.map.addUnicorn(unicorn);
+
+            // ✅ animate unicorn to pickup location
+            WildRydes.map.animate(
+                WildRydes.map.center,
+                {
+                    latitude: WildRydes.map.selectedPoint.latitude,
+                    longitude: WildRydes.map.selectedPoint.longitude
+                },
+                function () {
+                    console.log('Unicorn arrived');
+                }
+            );
         });
     }
 
-    $(function onDocReady() {
+    $(function () {
+
         $('#request').click(handleRequestClick);
-        $('#signOut').click(function() {
+
+        $('#signOut').click(function () {
             WildRydes.signOut();
-            alert("You have been signed out.");
+            alert("Signed out.");
             window.location.href = "signin.html";
         });
+
         $(WildRydes.map).on('pickupChange', handlePickupChanged);
 
-        WildRydes.authToken.then(function updateAuthMessage(token) {
+        WildRydes.authToken.then(function (token) {
             if (token) {
-                displayUpdate('You are authenticated. Click to see your <a href="#authTokenModal" data-toggle="modal">auth token</a>.');
+                displayUpdate(
+                    'Authenticated. View your <a href="#authTokenModal" data-toggle="modal">auth token</a>.'
+                );
                 $('.authToken').text(token);
             }
         });
@@ -77,21 +107,30 @@ WildRydes.map = WildRydes.map || {};
     });
 
     function handlePickupChanged() {
-        var requestButton = $('#request');
-        requestButton.text('Request Unicorn');
-        requestButton.prop('disabled', false);
+        var btn = $('#request');
+        btn.text('Request Unicorn');
+        btn.prop('disabled', false);
     }
 
     function handleRequestClick(event) {
-        var pickupLocation = WildRydes.map.selectedPoint;
         event.preventDefault();
+
+        var pickupLocation = WildRydes.map.selectedPoint;
+
+        if (!pickupLocation) {
+            alert("Please click a pickup location first!");
+            return;
+        }
+
         requestUnicorn(pickupLocation);
     }
 
     function animateArrival(callback) {
         var loader = $('.loader');
+
         loader.show();
-        setTimeout(function() {
+
+        setTimeout(function () {
             loader.hide();
             callback();
         }, 2000);
@@ -100,4 +139,5 @@ WildRydes.map = WildRydes.map || {};
     function displayUpdate(text) {
         $('#updates').append($('<li>' + text + '</li>'));
     }
+
 }(jQuery));
