@@ -391,32 +391,6 @@ If you prefer to host libraries locally, see `SETUP_NOTES.md` for download instr
    - Check DynamoDB console
    - View items in `Rides` table
 
-## 📁 Project Structure
-
-```
-wildrydes-site/
-├── index.html              # Landing page
-├── ride.html              # Main ride request page with map
-├── register.html          # User registration
-├── signin.html            # User sign in
-├── verify.html            # Email verification
-├── unicorns.html          # Unicorn fleet info
-├── faq.html              # FAQ page
-├── investors.html         # Investor information
-├── apply.html            # Driver application
-├── css/
-│   ├── main.css          # Main stylesheet (enhanced)
-│   └── font.css          # Font imports
-├── js/
-│   ├── config.js         # AWS configuration
-│   ├── cognito-auth.js   # Authentication logic
-│   ├── esri-map.js       # Map integration
-│   └── ride.js           # Ride request logic
-├── lambda/
-│   └── RequestUnicorn.js # Lambda function code
-├── README.md             # This file
-└── SETUP_NOTES.md        # Detailed setup notes
-```
 
 ## 🎨 New Features in This Version
 
