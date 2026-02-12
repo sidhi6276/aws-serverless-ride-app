@@ -1763,4 +1763,17 @@ body {
 .magical-map {
   height: 100%;
   width: 100%;
+   
 }
+
+
+
+#map {
+    position: absolute;
+    left: 300px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+}
+
