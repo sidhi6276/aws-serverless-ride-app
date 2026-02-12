@@ -1,81 +1,78 @@
-/*global WildRydes _config AmazonCognitoIdentity AWSCognito*/
+/*global WildRydes _config*/
 
 var WildRydes = window.WildRydes || {};
 WildRydes.map = WildRydes.map || {};
 
 (function rideScopeWrapper($) {
-    var authToken;
-    WildRydes.authToken.then(function setAuthToken(token) {
-        if (token) {
-            authToken = token;
-        } else {
-            window.location.href = '/signin.html';
-        }
-    }).catch(function handleTokenError(error) {
-        alert(error);
-        window.location.href = '/signin.html';
-    });
+    
+    // Mock authentication for testing
+    WildRydes.authToken = Promise.resolve('mock-token-for-testing');
+    
+    WildRydes.signOut = function() {
+        console.log('Sign out clicked');
+        alert('Sign out functionality requires AWS Cognito configuration');
+    };
 
     function requestUnicorn(pickupLocation) {
-        $.ajax({
-            method: 'POST',
-            url: _config.api.invokeUrl + '/ride',
-            headers: {
-                Authorization: authToken
-            },
-            data: JSON.stringify({
-                PickupLocation: {
-                    Latitude: pickupLocation.latitude,
-                    Longitude: pickupLocation.longitude
-                }
-            }),
-            contentType: 'application/json',
-            success: completeRequest,
-            error: function ajaxError(jqXHR, textStatus, errorThrown) {
-                console.error('Error requesting ride: ', textStatus, ', Details: ', errorThrown);
-                console.error('Response: ', jqXHR.responseText);
-                alert('An error occurred when requesting your unicorn:\n' + jqXHR.responseText);
-            }
-        });
+        console.log('Requesting unicorn at:', pickupLocation);
+        
+        // Show loading
+        $('#request').prop('disabled', true);
+        $('#request').text('Finding your unicorn...');
+        
+        // Simulate API call
+        setTimeout(function() {
+            // Mock unicorn data
+            var mockUnicorn = {
+                Name: 'Shadowfax',
+                Color: 'White',
+                Gender: 'Male'
+            };
+            
+            completeRequest({ Unicorn: mockUnicorn });
+        }, 1000);
     }
 
     function completeRequest(result) {
-        var unicorn;
-        var pronoun;
-        console.log('Response received from API: ', result);
-        unicorn = result.Unicorn;
-        pronoun = unicorn.Gender === 'Male' ? 'his' : 'her';
+        var unicorn = result.Unicorn;
+        var pronoun = unicorn.Gender === 'Male' ? 'his' : 'her';
+        
         displayUpdate(unicorn.Name + ', your ' + unicorn.Color + ' unicorn, is on ' + pronoun + ' way.');
+        
         animateArrival(function animateCallback() {
-            displayUpdate(unicorn.Name + ' has arrived. Giddy up!');
+            displayUpdate(unicorn.Name + ' has arrived. Giddy up! 🦄');
             WildRydes.map.unsetLocation();
-            $('#request').prop('disabled', 'disabled');
-            $('#request').text('Set Pickup');
+            $('#request').prop('disabled', true);
+            $('#request').text('Select Pickup Location →');
         });
     }
 
     // Register click handler for #request button
     $(function onDocReady() {
         $('#request').click(handleRequestClick);
+        
         $('#signOut').click(function() {
             WildRydes.signOut();
         });
         
-        WildRydes.authToken.then(function updateAuthMessage(token) {
-            if (token) {
-                displayUpdate('Authenticated. View your profile.');
-                $('.authToken').text(token);
-            }
-        });
+        // Show authenticated message
+        displayUpdate('✅ Authenticated. Click on map to select location.');
+        displayUpdate('⚠️ Demo mode - API not configured');
         
-        if (!_config.api.invokeUrl) {
-            $('#noApiMessage').show();
-        }
+        // Hide API warning if present
+        $('#noApiMessage').hide();
     });
 
     function handleRequestClick(event) {
-        var pickupLocation = WildRydes.map.selectedPoint;
         event.preventDefault();
+        
+        var pickupLocation = WildRydes.map.selectedPoint;
+        
+        if (!pickupLocation) {
+            alert('Please select a pickup location by clicking on the map');
+            return;
+        }
+        
         requestUnicorn(pickupLocation);
     }
 
@@ -97,4 +94,5 @@ WildRydes.map = WildRydes.map || {};
     function displayUpdate(text) {
         $('#updates').prepend($('<li>' + text + '</li>'));
     }
+    
 }(jQuery));
