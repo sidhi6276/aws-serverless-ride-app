@@ -3,9 +3,7 @@
 var WildRydes = window.WildRydes || {};
 
 (function scopeWrapper($) {
-
     var signinUrl = '/signin.html';
-
     var poolData = {
         UserPoolId: _config.cognito.userPoolId,
         ClientId: _config.cognito.userPoolClientId
@@ -26,15 +24,10 @@ var WildRydes = window.WildRydes || {};
         AWSCognito.config.region = _config.cognito.region;
     }
 
-    // ✅ Logout
     WildRydes.signOut = function signOut() {
-        var currentUser = userPool.getCurrentUser();
-        if (currentUser) {
-            currentUser.signOut();
-        }
+        userPool.getCurrentUser().signOut();
     };
 
-    // ✅ Get auth token
     WildRydes.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject) {
         var cognitoUser = userPool.getCurrentUser();
 
@@ -54,31 +47,40 @@ var WildRydes = window.WildRydes || {};
     });
 
     /*
-     * Cognito functions
+     * Cognito User Pool functions
      */
 
     function register(email, password, onSuccess, onFailure) {
-        var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute({
+        var dataEmail = {
             Name: 'email',
             Value: email
-        });
+        };
+        var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
 
         userPool.signUp(email, password, [attributeEmail], null,
             function signUpCallback(err, result) {
-                if (!err) onSuccess(result);
-                else onFailure(err);
+                if (!err) {
+                    onSuccess(result);
+                } else {
+                    onFailure(err);
+                }
             }
         );
     }
 
     function signin(email, password, onSuccess, onFailure) {
-        var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+        var authenticationData = {
             Username: email,
             Password: password
-        });
-
-        var cognitoUser = createCognitoUser(email);
-
+        };
+        var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(
+            authenticationData
+        );
+        var userData = {
+            Username: email,
+            Pool: userPool
+        };
+        var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
         cognitoUser.authenticateUser(authenticationDetails, {
             onSuccess: onSuccess,
             onFailure: onFailure
@@ -86,12 +88,14 @@ var WildRydes = window.WildRydes || {};
     }
 
     function verify(email, code, onSuccess, onFailure) {
-        createCognitoUser(email).confirmRegistration(code, true,
-            function confirmCallback(err, result) {
-                if (!err) onSuccess(result);
-                else onFailure(err);
+        var cognitoUser = createCognitoUser(email);
+        cognitoUser.confirmRegistration(code, true, function confirmCallback(err, result) {
+            if (!err) {
+                onSuccess(result);
+            } else {
+                onFailure(err);
             }
-        );
+        });
     }
 
     function createCognitoUser(email) {
@@ -102,7 +106,7 @@ var WildRydes = window.WildRydes || {};
     }
 
     /*
-     * Event handlers
+     *  Event Handlers
      */
 
     $(function onDocReady() {
@@ -112,61 +116,59 @@ var WildRydes = window.WildRydes || {};
     });
 
     function handleSignin(event) {
-        event.preventDefault();
-
         var email = $('#emailInputSignin').val();
         var password = $('#passwordInputSignin').val();
-
+        event.preventDefault();
         signin(email, password,
             function signinSuccess() {
-                console.log('Login success');
+                console.log('Successfully Logged In');
                 window.location.href = 'ride.html';
             },
             function signinError(err) {
-                alert(err.message || err);
+                alert(err);
             }
         );
     }
 
     function handleRegister(event) {
-        event.preventDefault();
-
         var email = $('#emailInputRegister').val();
         var password = $('#passwordInputRegister').val();
         var password2 = $('#password2InputRegister').val();
 
-        if (password !== password2) {
-            alert('Passwords do not match');
-            return;
-        }
-
-        register(email, password,
-            function registerSuccess(result) {
-                console.log('Registered:', result.user.getUsername());
+        var onSuccess = function registerSuccess(result) {
+            var cognitoUser = result.user;
+            console.log('user name is ' + cognitoUser.getUsername());
+            var confirmation = ('Registration successful. Please check your email inbox or spam folder for your verification code.');
+            if (confirmation) {
                 window.location.href = 'verify.html';
-            },
-            function registerFailure(err) {
-                alert(err.message || err);
             }
-        );
+        };
+        var onFailure = function registerFailure(err) {
+            alert(err);
+        };
+        event.preventDefault();
+
+        if (password === password2) {
+            register(email, password, onSuccess, onFailure);
+        } else {
+            alert('Passwords do not match');
+        }
     }
 
     function handleVerify(event) {
-        event.preventDefault();
-
         var email = $('#emailInputVerify').val();
         var code = $('#codeInputVerify').val();
-
+        event.preventDefault();
         verify(email, code,
             function verifySuccess(result) {
-                console.log('Verified:', result);
-                alert('Verification successful!');
+                console.log('call result: ' + result);
+                console.log('Successfully verified');
+                alert('Verification successful. You will now be redirected to the login page.');
                 window.location.href = signinUrl;
             },
             function verifyError(err) {
-                alert(err.message || err);
+                alert(err);
             }
         );
     }
-
 }(jQuery));
