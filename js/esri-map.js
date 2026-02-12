@@ -19,12 +19,12 @@ var WildRydes = window.WildRydes || {};
             basemap: 'streets-navigation-vector'
         });
 
-        // Create the view
+        // Create the view - DELHI, INDIA
         var view = new MapView({
             container: 'map',
             map: map,
-            center: [-122.31, 47.60], // Seattle coordinates
-            zoom: 12
+            center: [77.2090, 28.6139], // Delhi coordinates
+            zoom: 11
         });
 
         var pinSymbol = new SimpleMarkerSymbol({
@@ -44,8 +44,8 @@ var WildRydes = window.WildRydes || {};
         WildRydes.map = {
             selectedPoint: null,
             center: {
-                latitude: 47.60,
-                longitude: -122.31
+                latitude: 28.6139,
+                longitude: 77.2090
             },
             extent: {
                 minLng: null,
@@ -54,9 +54,6 @@ var WildRydes = window.WildRydes || {};
                 maxLat: null
             },
 
-            /**
-             * Update the map extent based on the current view
-             */
             updateExtent: function updateExtent() {
                 var extent = view.extent;
                 WildRydes.map.extent.minLng = extent.xmin;
@@ -65,9 +62,6 @@ var WildRydes = window.WildRydes || {};
                 WildRydes.map.extent.maxLat = extent.ymax;
             },
 
-            /**
-             * Handle map click events
-             */
             handleClick: function handleClick(event) {
                 // Remove existing graphics
                 view.graphics.removeAll();
@@ -96,11 +90,10 @@ var WildRydes = window.WildRydes || {};
                 // Enable the request button
                 document.getElementById('request').disabled = false;
                 document.getElementById('request').textContent = 'Request Unicorn';
+                
+                console.log('📍 Location selected:', event.mapPoint.latitude, event.mapPoint.longitude);
             },
 
-            /**
-             * Animate unicorn arrival
-             */
             animate: function animate(origin, dest, callback) {
                 var originPoint = new Point({
                     longitude: origin.longitude,
@@ -142,9 +135,6 @@ var WildRydes = window.WildRydes || {};
                 animateStep();
             },
 
-            /**
-             * Clear the selected point
-             */
             unsetLocation: function unsetLocation() {
                 view.graphics.removeAll();
                 WildRydes.map.selectedPoint = null;
@@ -153,7 +143,7 @@ var WildRydes = window.WildRydes || {};
 
         // Update extent when view is ready
         view.when(function() {
-            console.log('Map view is ready');
+            console.log('✅ Map view is ready - Delhi, India');
             WildRydes.map.updateExtent();
         });
 
@@ -165,7 +155,7 @@ var WildRydes = window.WildRydes || {};
         // Handle map clicks
         view.on('click', WildRydes.map.handleClick);
 
-        console.log('🗺️ ESRI Map initialized successfully');
+        console.log('🗺️ ESRI Map initialized successfully - India');
     });
 
 }());
