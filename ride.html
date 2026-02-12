@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="css/styles.css">
     
     <style>
-        /* Reset and base */
         * {
             margin: 0;
             padding: 0;
@@ -32,7 +31,6 @@
             width: 100vw;
         }
         
-        /* Main container - fixed grid */
         .ride-container {
             display: grid;
             grid-template-columns: 380px 1fr;
@@ -45,7 +43,6 @@
             bottom: 0;
         }
         
-        /* Sidebar */
         .ride-sidebar {
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
             padding: 2rem;
@@ -54,10 +51,6 @@
             position: relative;
             z-index: 100;
             height: 100vh;
-        }
-        
-        .sidebar-header {
-            margin-bottom: 2rem;
         }
         
         .logo-section {
@@ -108,6 +101,7 @@
             color: #cbd5e1;
             font-size: 0.95rem;
             line-height: 1.6;
+            margin-bottom: 2rem;
         }
         
         .request-section {
@@ -129,8 +123,6 @@
             font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
         
         .btn-request:disabled {
@@ -144,16 +136,6 @@
             box-shadow: 0 12px 32px rgba(139, 92, 246, 0.4);
         }
         
-        .btn-request .btn-icon {
-            display: inline-block;
-            margin-left: 0.5rem;
-            transition: transform 0.3s ease;
-        }
-        
-        .btn-request:not(:disabled):hover .btn-icon {
-            transform: translateX(5px);
-        }
-        
         .updates-section {
             margin-top: 2rem;
         }
@@ -164,9 +146,6 @@
             font-weight: 700;
             margin-bottom: 1rem;
             color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         
         .updates-list {
@@ -197,26 +176,6 @@
             }
         }
         
-        .auth-token-section {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-        
-        .auth-token-section a {
-            color: #10b981;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .auth-token-section a:hover {
-            text-decoration: underline;
-        }
-        
         .btn-signout {
             width: 100%;
             padding: 1rem;
@@ -232,10 +191,8 @@
         
         .btn-signout:hover {
             background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
         }
         
-        /* Map container - FULL HEIGHT */
         .map-container {
             position: relative;
             height: 100vh;
@@ -243,15 +200,14 @@
             overflow: hidden;
         }
         
-        /* Map itself - FULL SIZE */
         #map {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100vh;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100vh !important;
         }
         
         .loader {
@@ -265,7 +221,6 @@
             padding: 2.5rem 3rem;
             border-radius: 16px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
         
         .loader-spinner {
@@ -282,12 +237,6 @@
             to { transform: rotate(360deg); }
         }
         
-        .loader-text {
-            font-size: 1.1rem;
-            color: white;
-            font-weight: 600;
-        }
-        
         .no-api-warning {
             display: none;
             margin-top: 1rem;
@@ -297,19 +246,12 @@
             border-radius: 8px;
             font-size: 0.85rem;
             color: #fbbf24;
-            line-height: 1.5;
         }
         
         .no-api-warning.show {
             display: block;
         }
         
-        .warning-icon {
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-        
-        /* Aurora background effect */
         .aurora-bg {
             position: fixed;
             top: 0;
@@ -333,56 +275,13 @@
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
-        
-        /* Scrollbar styling for sidebar */
-        .ride-sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .ride-sidebar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-        }
-        
-        .ride-sidebar::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.5);
-            border-radius: 3px;
-        }
-        
-        .ride-sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.7);
-        }
-        
-        /* Responsive */
-        @media (max-width: 968px) {
-            .ride-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr;
-            }
-            
-            .ride-sidebar {
-                height: auto;
-                max-height: 40vh;
-            }
-            
-            .map-container {
-                height: 60vh;
-            }
-            
-            #map {
-                height: 60vh;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Aurora Background Effect -->
     <div class="aurora-bg"></div>
     
     <div class="ride-container">
-        <!-- Sidebar -->
         <div class="ride-sidebar">
-            <!-- Logo Section -->
             <div class="logo-section">
                 <div class="logo-icon">🦄</div>
                 <div class="logo-text">
@@ -391,82 +290,47 @@
                 </div>
             </div>
             
-            <!-- Header -->
-            <div class="sidebar-header">
-                <h2 class="page-title">🗺️ Request Your Ride</h2>
-                <p class="page-subtitle">Click on the map to choose your pickup location</p>
-            </div>
+            <h2 class="page-title">🗺️ Request Your Ride</h2>
+            <p class="page-subtitle">Click on the map to choose your pickup location</p>
             
-            <!-- Request Section -->
             <div class="request-section">
                 <button id="request" class="btn-request" disabled>
-                    <span id="requestButtonText">Select Pickup Location</span>
-                    <span class="btn-icon">→</span>
+                    Select Pickup Location →
                 </button>
                 
                 <div id="noApiMessage" class="no-api-warning">
-                    <span class="warning-icon">⚠️</span>
-                    <strong>API Not Configured:</strong> Update your API Gateway URL in config.js to request unicorns.
+                    ⚠️ <strong>API Not Configured</strong>
                 </div>
             </div>
             
-            <!-- Updates Section -->
             <div class="updates-section">
-                <h3 class="section-heading">
-                    <span>📡</span>
-                    Live Updates
-                </h3>
+                <h3 class="section-heading">📡 Live Updates</h3>
                 <ul id="updates" class="updates-list">
                     <li>Waiting for pickup location...</li>
                 </ul>
-                
-                <div id="authTokenInfo" class="auth-token-section" style="display: none;">
-                    ✅ Authenticated successfully! 
-                </div>
             </div>
             
-            <!-- Sign Out Button -->
             <button id="signOut" class="btn-signout">
                 🚪 Sign Out
             </button>
         </div>
         
-        <!-- Map Container - FULL HEIGHT -->
         <div class="map-container">
             <div id="map"></div>
-            
-            <!-- Loading Indicator -->
             <div class="loader">
                 <div class="loader-spinner"></div>
-                <div class="loader-text">🦄 Your magical unicorn is on the way...</div>
+                <div style="color: white; font-weight: 600;">🦄 Your magical unicorn is on the way...</div>
             </div>
         </div>
     </div>
     
-    <!-- Auth Token Modal (Hidden, for future use) -->
-    <div id="authTokenModal" style="display: none;">
-        <h3>Your Auth Token</h3>
-        <p class="authToken" style="word-break: break-all; font-family: monospace; font-size: 0.8rem;"></p>
-    </div>
-    
-    <!-- Scripts -->
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- AWS SDK & Cognito -->
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.0.1/dist/amazon-cognito-identity.min.js"></script>
-    
-    <!-- Config -->
     <script src="js/config.js"></script>
-    
-    <!-- Cognito Auth -->
     <script src="js/cognito-auth.js"></script>
-    
-    <!-- Esri Map -->
+    <script src="https://js.arcgis.com/4.25/"></script>
     <script src="js/esri-map.js"></script>
-    
-    <!-- Ride Logic -->
     <script src="js/ride.js"></script>
 </body>
 </html>
