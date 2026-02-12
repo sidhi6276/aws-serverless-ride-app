@@ -1,100 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Wild Rydes — Request Ride 🦄</title>
-
-<!-- ArcGIS -->
-<link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
-<script src="https://js.arcgis.com/4.25/"></script>
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- App JS -->
-<script src="js/config.js"></script>
-<script src="js/cognito-auth.js"></script>
-<script src="js/ride.js"></script>
-
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0f0820;
-    color: white;
-}
-
-.sidebar {
-    width: 320px;
-    height: 100vh;
-    background: #140b2b;
-    padding: 20px;
-    box-sizing: border-box;
-    position: fixed;
-    left: 0;
-    top: 0;
-}
-
-.sidebar h2 {
-    margin-top: 0;
-}
-
-#map {
-    position: absolute;
-    left: 320px;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 6px;
-    background: #8b5cf6;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-button:disabled {
-    background: #555;
-}
-
-ul {
-    padding-left: 20px;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wild Rydes - Request Your Magical Ride 🦄</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Esri ArcGIS CSS -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+    
+    <!-- Your Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Reset and base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* Main container - fixed grid */
+        .ride-container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* Sidebar */
+        .ride-sidebar {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+            padding: 2rem;
+            overflow-y: auto;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 100;
+            height: 100vh;
+        }
+        
+        .sidebar-header {
+            margin-bottom: 2rem;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            animation: bounce-subtle 3s ease-in-out infinite;
+        }
+        
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .logo-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 0;
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+        
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .page-subtitle {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .request-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+        
+        .btn-request {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-request:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn-request:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.4);
+        }
+        
+        .btn-request .btn-icon {
+            display: inline-block;
+            margin-left: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-request:not(:disabled):hover .btn-icon {
+            transform: translateX(5px);
+        }
+        
+        .updates-section {
+            margin-top: 2rem;
+        }
+        
+        .section-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .updates-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .updates-list li {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            border-left: 3px solid #8b5cf6;
+            animation: slideIn 0.3s ease;
+            line-height: 1.5;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .auth-token-section {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        
+        .auth-token-section a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .auth-token-section a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn-signout {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+        
+        .btn-signout:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Map container - FULL HEIGHT */
+        .map-container {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        /* Map itself - FULL SIZE */
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .loader {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 2.5rem 3rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(139, 92, 246, 0.2);
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            font-size: 1.1rem;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .no-api-warning {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #fbbf24;
+            line-height: 1.5;
+        }
+        
+        .no-api-warning.show {
+            display: block;
+        }
+        
+        .warning-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        /* Aurora background effect */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                #0f0820 0%,
+                #1e1b4b 25%,
+                #312e81 50%,
+                #4c1d95 75%,
+                #0f0820 100%
+            );
+            background-size: 400% 400%;
+            animation: aurora-shift 15s ease infinite;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        @keyframes aurora-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Scrollbar styling for sidebar */
+        .ride-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .ride-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .ride-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 3px;
+        }
+        
+        .ride-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+        
+        /* Responsive */
+        @media (max-width: 968px) {
+            .ride-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            
+            .ride-sidebar {
+                height: auto;
+                max-height: 40vh;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+            
+            #map {
+                height: 60vh;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-<div class="sidebar">
-
-    <h2>🦄 Request Ride</h2>
-    <p>Click on the map to choose pickup location</p>
-
-    <button id="request" disabled>
-        Select Pickup Location
-    </button>
-
-    <h3>Live Updates</h3>
-    <ul id="updatesList">
-        <li>Waiting for location...</li>
-    </ul>
-
-    <button id="signOut">
-        Sign Out
-    </button>
-
-</div>
-
-<div id="map"></div>
-
+    <!-- Aurora Background Effect -->
+    <div class="aurora-bg"></div>
+    
+    <div class="ride-container">
+        <!-- Sidebar -->
+        <div class="ride-sidebar">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-icon">🦄</div>
+                <div class="logo-text">
+                    <h1>Wild Rydes</h1>
+                    <div class="logo-subtitle">Magical Transportation</div>
+                </div>
+            </div>
+            
+            <!-- Header -->
+            <div class="sidebar-header">
+                <h2 class="page-title">🗺️ Request Your Ride</h2>
+                <p class="page-subtitle">Click on the map to choose your pickup location</p>
+            </div>
+            
+            <!-- Request Section -->
+            <div class="request-section">
+                <button id="request" class="btn-request" disabled>
+                    <span id="requestButtonText">Select Pickup Location</span>
+                    <span class="btn-icon">→</span>
+                </button>
+                
+                <div id="noApiMessage" class="no-api-warning">
+                    <span class="warning-icon">⚠️</span>
+                    <strong>API Not Configured:</strong> Update your API Gateway URL in config.js to request unicorns.
+                </div>
+            </div>
+            
+            <!-- Updates Section -->
+            <div class="updates-section">
+                <h3 class="section-heading">
+                    <span>📡</span>
+                    Live Updates
+                </h3>
+                <ul id="updates" class="updates-list">
+                    <li>Waiting for pickup location...</li>
+                </ul>
+                
+                <div id="authTokenInfo" class="auth-token-section" style="display: none;">
+                    ✅ Authenticated successfully! 
+                </div>
+            </div>
+            
+            <!-- Sign Out Button -->
+            <button id="signOut" class="btn-signout">
+                🚪 Sign Out
+            </button>
+        </div>
+        
+        <!-- Map Container - FULL HEIGHT -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <!-- Loading Indicator -->
+            <div class="loader">
+                <div class="loader-spinner"></div>
+                <div class="loader-text">🦄 Your magical unicorn is on the way...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Auth Token Modal (Hidden, for future use) -->
+    <div id="authTokenModal" style="display: none;">
+        <h3>Your Auth Token</h3>
+        <p class="authToken" style="word-break: break-all; font-family: monospace; font-size: 0.8rem;"></p>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- AWS SDK & Cognito -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.0.1/dist/amazon-cognito-identity.min.js"></script>
+    
+    <!-- Config -->
+    <script src="js/config.js"></script>
+    
+    <!-- Cognito Auth -->
+    <script src="js/cognito-auth.js"></script>
+    
+    <!-- Esri Map -->
+    <script src="js/esri-map.js"></script>
+    
+    <!-- Ride Logic -->
+    <script src="js/ride.js"></script>
 </body>
 </html>
