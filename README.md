@@ -517,7 +517,7 @@ Need Help?
 📧 Email: sidhigoel200@gmail.com
 
 
-<div align="center">
+
 🌟 Star This Repository
 If this project helped you learn or build something awesome, please give it a ⭐!
 
@@ -526,4 +526,3 @@ Made with ❤️ by Sidhi Goel
 
 **Happy Coding! 🦄✨**
 
-</div>
